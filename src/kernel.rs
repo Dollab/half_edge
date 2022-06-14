@@ -520,6 +520,55 @@ impl ConnectivityKernel {
         return new_opposite;
     }
 
+    /// Extrude the vertex that the edge passed as parameter starts from, adding one or two
+    /// half edges to the kernel.
+    ///
+    /// The original edge *must* have a next vertex
+    pub fn extrude_vertex2(&mut self, edge: EdgeId, to: VertexId) -> EdgeId {
+        //              to
+        //              ^|
+        //    (new_edge)||new_opposite
+        //              |v
+        //v1 ---edge--->v2
+        //  <--opposite--
+
+        debug_assert!(is_valid(edge));
+        debug_assert!(is_valid(to));
+
+        let edge_data = self[edge];
+        let opposite = edge_data.opposite;
+        let opposite_data = self[opposite];
+        let v2 = opposite_data.vertex;
+
+        let new_edge = if is_valid(opposite) {
+            self.add_edge(HalfEdge {
+                next: NO_EDGE, // will be new_oppsite
+                prev: edge,
+                opposite: NO_EDGE, // will be new_oppsite
+                face: edge_data.face,
+                vertex: v2,
+            })
+        } else { NO_EDGE };
+
+        let new_opposite = self.add_edge(HalfEdge {
+            next: opposite,
+            prev: new_edge,
+            opposite: new_edge,
+            face: edge_data.face,
+            vertex: to,
+        });
+
+        if is_valid(new_edge) && is_valid(new_opposite){
+            self[opposite].prev = new_opposite;
+            self[edge].next = new_edge;
+            let new_edge_data = &mut self[new_edge];
+            new_edge_data.opposite = new_opposite;
+            new_edge_data.next = new_opposite;
+        }
+
+        return new_edge;
+    }
+
     /// Connect two vertices.
     ///
     /// Only use this on isolated vertices.
