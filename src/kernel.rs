@@ -529,29 +529,29 @@ impl ConnectivityKernel {
         //              ^|
         //    (new_edge)||new_opposite
         //              |v
-        //v1 ---edge--->v2
-        //  <--opposite--
+        //v1 ---edge---> --next---->
+        // <--opposite- v2
 
         debug_assert!(is_valid(edge));
         debug_assert!(is_valid(to));
 
         let edge_data = self[edge];
-        let opposite = edge_data.opposite;
-        let opposite_data = self[opposite];
-        let v2 = opposite_data.vertex;
+        let next = edge_data.next;
+        let next_data = self[next];
+        let v2 = next_data.vertex;
 
-        let new_edge = if is_valid(opposite) {
+        let new_edge = if is_valid(next) {
             self.add_edge(HalfEdge {
-                next: NO_EDGE, // will be new_oppsite
+                next: NO_EDGE, // will be new_opposite
                 prev: edge,
-                opposite: NO_EDGE, // will be new_oppsite
+                opposite: NO_EDGE, // will be new_opposite
                 face: edge_data.face,
                 vertex: v2,
             })
         } else { NO_EDGE };
 
         let new_opposite = self.add_edge(HalfEdge {
-            next: opposite,
+            next,
             prev: new_edge,
             opposite: new_edge,
             face: edge_data.face,
@@ -559,12 +559,14 @@ impl ConnectivityKernel {
         });
 
         if is_valid(new_edge) && is_valid(new_opposite){
-            self[opposite].prev = new_opposite;
+            self[next].prev = new_opposite;
             self[edge].next = new_edge;
             let new_edge_data = &mut self[new_edge];
             new_edge_data.opposite = new_opposite;
             new_edge_data.next = new_opposite;
         }
+
+        self.debug_assert_face_invariants(self[edge].face);
 
         return new_edge;
     }
