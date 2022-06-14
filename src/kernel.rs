@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 
 use id_internals::{is_valid, Index};
 use iterators::{EdgeIdLoop, ReverseEdgeIdLoop, MutEdgeLoop};
-use id::{Id, IdVec, IdRange};
+use id::{Id, IdVec, IdRange, FromIndex};
 
 #[derive(Debug)]
 pub struct Vertex_;
@@ -140,6 +140,14 @@ impl ConnectivityKernel {
     pub fn contains_edge(&self, id: EdgeId) -> bool { self.edges.has_id(id) }
 
     pub fn contains_face(&self, id: FaceId) -> bool { self.faces.has_id(id) }
+
+    pub fn iter_face_ids(&self) -> impl Iterator<Item = FaceId> + '_ {
+        self.faces.iter().enumerate().map(|(i, _)| Id::from_index(i))
+    }
+
+    pub fn iter_edge_ids(&self) -> impl Iterator<Item = EdgeId> + '_ {
+        self.edges.iter().enumerate().map(|(i, _)| Id::from_index(i))
+    }
 
     pub fn walk_edge_ids_around_face<'l>(&'l self, id: FaceId) -> EdgeIdLoop<'l> {
         let edge = self[id].first_edge;
@@ -686,7 +694,7 @@ impl ConnectivityKernel {
         return first_edge;
     }
 
-    /// Add a loop of edges adn a face, creating a hole in an existing face.
+    /// Add a loop of edges to a face, creating a hole in an existing face.
     pub fn add_hole(&mut self, outer_face: FaceId, vertices: VertexIdRange) -> FaceId {
         let hole_face = self.add_face();
         let _ = self.add_loop(vertices, Some(hole_face), Some(outer_face));

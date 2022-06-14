@@ -166,53 +166,6 @@ impl<'l> Iterator for VertexEdgeIterator<'l> {
     }
 }
 
-//pub struct VertexIdIterator {
-//    current: Index,
-//    stop: Index,
-//}
-//
-//impl<'l> Iterator for VertexIdIterator {
-//    type Item = VertexId;
-//
-//    fn next(&mut self) -> Option<VertexId> {
-//        if self.current == self.stop { return None; }
-//        let res = self.current;
-//        self.current += 1;
-//        return Some(vertex_id(res));
-//    }
-//}
-//
-//pub struct EdgeIdIterator {
-//    current: Index,
-//    stop: Index,
-//}
-//
-//impl<'l> Iterator for EdgeIdIterator {
-//    type Item = EdgeId;
-//
-//    fn next(&mut self) -> Option<EdgeId> {
-//        if self.current == self.stop { return None; }
-//        let res = self.current;
-//        self.current += 1;
-//        return Some(edge_id(res));
-//    }
-//}
-//
-//pub struct FaceIdIterator {
-//    current: Index,
-//    stop: Index,
-//}
-//
-//impl<'l> Iterator for FaceIdIterator {
-//    type Item = FaceId;
-//
-//    fn next(&mut self) -> Option<FaceId> {
-//        if self.current == self.stop { return None; }
-//        let res = self.current;
-//        self.current += 1;
-//        return Some(face_id(res));
-//    }
-//}
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Direction {
@@ -238,8 +191,8 @@ pub struct EdgeCirculator<'l> {
 impl<'l> EdgeCirculator<'l> {
     pub fn new(kernel: &'l ConnectivityKernel, edge: EdgeId) -> EdgeCirculator{
         EdgeCirculator {
-            kernel: kernel,
-            edge: edge,
+            kernel,
+            edge,
         }
     }
 
